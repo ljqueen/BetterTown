@@ -8,6 +8,12 @@
         <!-- EmailJS integration -->
             <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
             <script>
+    // Show logged in user at the top (run after DOM is loaded)
+    (function showLoggedInUser() {
+        var user = sessionStorage.getItem('btown_admin_user') || 'Unknown';
+        var el = document.getElementById('logged-in-user');
+        if (el) el.textContent = 'Logged in as: ' + user;
+    })();
     // Add a new admin account from the form
     function districtAddAdminAccount(e) {
         e.preventDefault();
@@ -186,17 +192,28 @@
         </style>
 </head>
 <body>
-    <nav class="navbar">
-        <div class="navbar-logo">BetterTown</div>
-        <ul class="navbar-links">
-            <li><a href="index.html">Home</a></li>
-        </ul>
+    <nav class="navbar" style="background:linear-gradient(90deg,#222 0%,#185a9d 100%);">
+        <div class="navbar-logo" style="margin-right:auto;color:#fff;">BetterTown</div>
+        <div style="display:flex;align-items:center;gap:1.5rem;margin-left:auto;">
+            <ul class="navbar-links" style="margin:0;">
+                <li><a href="index.html">Home</a></li>
+            </ul>
+            <a href="admin.html" class="admin-btn" style="background:#185a9d;color:#fff;padding:0.5rem 1.2rem;border-radius:8px;font-weight:700;text-decoration:none;">Admin</a>
+        </div>
     </nav>
     <header>
         <h1>District Management</h1>
     </header>
     <main>
-        <section class="district-panel">
+    <section class="district-panel" id="monthly-reports-section" style="margin-top:2.5rem;">
+    <h2 style="display:inline-block;">Monthly Website Reports</h2>
+    <button class="admin-btn" id="toggle-reports-btn" style="margin-left:1.2rem;vertical-align:middle;">View Reports</button>
+    <div style="margin-bottom:1rem;display:inline-block;">
+        <button class="admin-btn" onclick="exportReportsJSON()">Save All (Export JSON)</button>
+    </div>
+    <ul id="monthly-reports-list" style="margin-bottom:1.5rem;display:none;"></ul>
+    </section>
+    <section class="district-panel">
             <h2>Manage Events</h2>
             <form id="add-event-form" onsubmit="addEvent(event)" style="margin-bottom:1.5rem;">
                 <input type="text" id="event-title" placeholder="Event Title" required style="width:200px;">
@@ -248,7 +265,66 @@
         </section>
     </main>
     <footer>
-        <p>&copy; 2025 BetterTown. All rights reserved.</p>
+    <script>
+    // Display all submitted monthly reports from siteA
+    function getMonthlyReports() {
+        return JSON.parse(localStorage.getItem('btown_monthly_reports')||'[]');
+    }
+    function renderMonthlyReports() {
+        const list = document.getElementById('monthly-reports-list');
+        const reports = getMonthlyReports();
+        if (!list) return;
+    list.innerHTML = reports.length ? reports.map((r, i) => `<li style='margin-bottom:0.7rem;'><b>${r.month}</b>: <span>${r.content.replace(/</g,'&lt;')}</span> <button onclick='deleteReport(${i})' style='margin-left:1rem;background:#e74c3c;color:#fff;border:none;padding:0.2rem 0.7rem;border-radius:5px;cursor:pointer;'>Delete</button></li>`).join('') : '<li>No reports submitted yet.</li>';
+    // Toggle reports list visibility
+    document.getElementById('toggle-reports-btn').onclick = function() {
+        const list = document.getElementById('monthly-reports-list');
+        if (list.style.display === 'none' || !list.style.display) {
+            list.style.display = 'block';
+            this.textContent = 'Hide Reports';
+        } else {
+            list.style.display = 'none';
+            this.textContent = 'View Reports';
+        }
+    };
+}
+
+// Make these functions global for button handlers
+function deleteReport(idx) {
+    let reports = getMonthlyReports();
+    if (!confirm('Delete this report?')) return;
+    reports.splice(idx, 1);
+    localStorage.setItem('btown_monthly_reports', JSON.stringify(reports));
+    renderMonthlyReports();
+}
+function exportReportsJSON() {
+    const reports = getMonthlyReports();
+    if (!reports.length) return alert('No reports to export.');
+    const blob = new Blob([JSON.stringify(reports, null, 2)], {type: 'application/json'});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'monthly_reports.json';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+}
+
+renderMonthlyReports();
+    </script>
+    <p>&copy; 2025 BetterTown. All rights reserved.</p>
+    </footer>
+    <script>
+    // Increment District Page Analytics (total and monthly)
+    (function(){
+        let n = parseInt(localStorage.getItem('analytics_district')||'0',10);
+        localStorage.setItem('analytics_district', n+1);
+        const now = new Date();
+        const key = 'analytics_district_month_' + now.getFullYear() + '_' + (now.getMonth()+1);
+        let m = parseInt(localStorage.getItem(key)||'0',10);
+        localStorage.setItem(key, m+1);
+    })();
+    </script>
     </footer>
     <script>
     // Event management
@@ -323,10 +399,12 @@
         for (let i = 0; i < firstDay.getDay(); i++) html += '<td></td>';
         for (let d = 1; d <= lastDay.getDate(); d++) {
             const dateStr = `${year}-${String(month+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
-            const dayEvents = events.filter(ev => ev.date === dateStr);
+            const dayEvents = events
+                .map((ev, idx) => ({...ev, _idx: idx}))
+                .filter(ev => ev.date === dateStr);
             if ((firstDay.getDay() + d - 1) % 7 === 0 && d !== 1) html += '</tr><tr>';
             if (dayEvents.length) {
-                html += `<td class='event-day' title='${dayEvents.map(ev => ev.title + ' at ' + ev.time).join('\n')}'>${d}<div style='font-size:0.8rem;margin-top:0.2rem;'>${dayEvents.map(ev => `<div>${ev.title} <span style='color:#185a9d;'>${ev.time}</span></div>`).join('')}</div></td>`;
+                html += `<td class='event-day' title='${dayEvents.map(ev => ev.title + ' at ' + ev.time).join('\n')}'>${d}<div style='font-size:0.8rem;margin-top:0.2rem;'>${dayEvents.map(ev => `<div>${ev.title} <span style='color:#185a9d;'>${ev.time}</span> <button onclick='deleteEventByIdx(${ev._idx})' title='Delete event' style='background:none;border:none;color:#e74c3c;font-size:1.1em;cursor:pointer;padding:0 0.2em;'>🗑</button></div>`).join('')}</div></td>`;
             } else {
                 html += `<td>${d}</td>`;
             }
@@ -414,15 +492,26 @@
             return;
         }
         listDiv.innerHTML = '<b>Current Admins:</b><ul style="margin:0.5rem 0 0 1.2rem;">' +
-            admins.map((a, i) =>
-                `<li id='admin-li-${i}'>
+            admins.map((a, i) => {
+                const isWorker = (a.isDistrictWorker === true);
+                return `<li id='admin-li-${i}'>
                     <span id='admin-info-${i}'>
                         <b>${a.username}</b> <span style='color:#185a9d;'>${a.email||'no email'}</span>
+                        ${isWorker ? "<span style='color:#43cea2;font-weight:bold;margin-left:0.7rem;'>(District Worker)</span>" : ''}
                     </span>
                     <button class='admin-btn' style='padding:0.2rem 0.7rem;font-size:0.95rem;' onclick='editDistrictAdmin(${i})'>Edit</button>
                     <button class='admin-btn' style='background:#e74c3c;padding:0.2rem 0.7rem;font-size:0.95rem;' onclick='deleteDistrictAdmin(${i})'>Delete</button>
-                </li>`
-            ).join('') + '</ul>';
+                    ${!isWorker ? `<button class='admin-btn' style='background:#ffd700;color:#185a9d;padding:0.2rem 0.7rem;font-size:0.95rem;margin-left:0.5rem;' onclick='makeDistrictWorker(${i})'>Make District Worker</button>` : ''}
+                </li>`;
+            }).join('') + '</ul>';
+    }
+
+    function makeDistrictWorker(idx) {
+        let admins = getDistrictAdminAccounts();
+        admins[idx].isDistrictWorker = true;
+        localStorage.setItem('btown_admin_accounts', JSON.stringify(admins));
+        renderDistrictAdminList();
+        alert('Admin is now a District Worker and can log in as a district worker.');
     }
 
     function editDistrictAdmin(idx) {

@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Site Analytics - BetterTown</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        .analytics-panel { max-width: 800px; margin: 2.5rem auto; background: #fff; border-radius: 18px; box-shadow: 0 4px 24px #185a9d18; padding: 2.5rem 2rem 2rem 2rem; }
+        .analytics-panel h1 { font-size: 2.1rem; color: #185a9d; margin-bottom: 1.2rem; }
+        .chart-section { margin-bottom: 2.5rem; }
+    </style>
+</head>
+<body>
+    <nav class="navbar" style="background:linear-gradient(90deg,#222 0%,#185a9d 100%);">
+        <div class="navbar-logo" style="margin-right:auto;color:#fff;">BetterTown</div>
+        <div style="display:flex;align-items:center;gap:1.5rem;margin-left:auto;">
+            <ul class="navbar-links" style="margin:0;">
+                <li><a href="index.html">Home</a></li>
+                <li><a href="admin.html">Admin</a></li>
+            </ul>
+            <button onclick="window.print()" class="admin-btn" style="margin-left:1.2rem;">Print This Page</button>
+        </div>
+    </nav>
+    <main>
+    <section class="analytics-panel">
+            <h1>Site Analytics</h1>
+            <div class="chart-section">
+                <h2>Page Visits</h2>
+                <canvas id="visitsChart" height="120"></canvas>
+            </div>
+            <div class="chart-section">
+                <h2>Usage Breakdown</h2>
+                <canvas id="usagePie" height="120"></canvas>
+            </div>
+            <div class="chart-section">
+                <h2>Monthly Percentage Change (Demo)</h2>
+                <canvas id="monthlyPercentChart" height="120"></canvas>
+            </div>
+        </section>
+    </main>
+    <footer>
+    <section class="analytics-panel" id="monthly-report-submit-section" style="margin:2.5rem auto;max-width:800px;">
+    <h2>Submit Monthly Website Report</h2>
+    <div id="report-status-this-month" style="margin-bottom:1rem;font-weight:bold;"></div>
+        <div style="background:#e3ecff;padding:1rem 1.2rem;border-radius:10px;margin-bottom:1rem;">
+            <b>Instructions for Admins:</b><br>
+            <ul style="margin:0 0 0.5rem 1.2rem;padding:0;">
+                <li>One admin is responsible for submitting the report each month. Admins rotate in order (see below).</li>
+                <li>The report is <b>due by the 30th of every month</b>.</li>
+                <li>Report must be <b>at least 150 words</b> (word count is enforced).</li>
+                <li>If you are the assigned admin, please complete the report on time.</li>
+            </ul>
+            <span id="assigned-admin-info" style="color:#185a9d;font-weight:bold;"></span>
+        </div>
+        <form id="monthly-report-form" style="display:flex;flex-wrap:wrap;gap:1rem;align-items:center;">
+            <input type="month" id="report-month" required style="padding:0.5rem;">
+            <textarea id="report-content" placeholder="Enter monthly website data (summary, issues, highlights, etc.)" required style="flex:1;min-width:220px;padding:0.5rem;"></textarea>
+            <button type="submit" class="admin-btn">Submit Report</button>
+            <span id="word-count" style="margin-left:1rem;color:#185a9d;"></span>
+        </form>
+        <div id="report-submit-msg" style="margin-top:0.7rem;color:#185a9d;font-weight:bold;"></div>
+    </section>
+        <p>&copy; 2025 BetterTown. All rights reserved.</p>
+    </footer>
+    <script>
+    // Set report-month input to current month by default
+    (function setDefaultReportMonth() {
+        const now = new Date();
+        const monthStr = now.toISOString().slice(0,7);
+        const monthInput = document.getElementById('report-month');
+        if (monthInput) monthInput.value = monthStr;
+    })();
+    // Update status when month changes
+    document.getElementById('report-month').addEventListener('input', showReportStatusThisMonth);
+    // Show if a report has been submitted for the current month
+    function showReportStatusThisMonth() {
+        const now = new Date();
+        const monthStr = now.toISOString().slice(0,7); // 'YYYY-MM'
+        const reports = getMonthlyReports();
+        const statusDiv = document.getElementById('report-status-this-month');
+        if (!statusDiv) return;
+        if (reports.some(r => r.month === monthStr)) {
+            statusDiv.textContent = '✅ Report for this month has been submitted.';
+            statusDiv.style.color = '#43cea2';
+        } else {
+            statusDiv.textContent = '⚠️ No report submitted for this month yet. (Minimum 150 words)';
+            statusDiv.style.color = '#e74c3c';
+        }
+    }
+    showReportStatusThisMonth();
+    // Also update after submitting
+    // Monthly Report Submission Logic
+    function getMonthlyReports() {
+        return JSON.parse(localStorage.getItem('btown_monthly_reports')||'[]');
+    }
+    function saveMonthlyReports(reports) {
+        localStorage.setItem('btown_monthly_reports', JSON.stringify(reports));
+    }
+    // Enforce 150+ word count and rotating admin assignment
+    const admins = JSON.parse(localStorage.getItem('btown_admin_accounts')||'[{"username":"ljqueen"}]');
+    function getAssignedAdmin(monthStr) {
+        // monthStr: 'YYYY-MM'
+        if (!admins.length) return 'ljqueen';
+        // Find index: count months since a fixed start (e.g. Jan 2024)
+        const [y,m] = monthStr.split('-').map(Number);
+        const start = new Date(2024,0,1); // Jan 2024
+        const curr = new Date(y,m-1,1);
+        const diff = (curr.getFullYear()-start.getFullYear())*12 + (curr.getMonth()-start.getMonth());
+        return admins[diff%admins.length].username;
+    }
+    function updateAssignedAdminInfo() {
+        const month = document.getElementById('report-month').value;
+        if (!month) { document.getElementById('assigned-admin-info').textContent = ''; return; }
+        const admin = getAssignedAdmin(month);
+        document.getElementById('assigned-admin-info').textContent = `Assigned admin for this month: ${admin}`;
+    }
+    document.getElementById('report-month').addEventListener('input', updateAssignedAdminInfo);
+    updateAssignedAdminInfo();
+    // Word count enforcement
+    document.getElementById('report-content').addEventListener('input', function() {
+        const wc = this.value.trim().split(/\s+/).filter(Boolean).length;
+        document.getElementById('word-count').textContent = wc + ' words';
+    });
+    document.getElementById('monthly-report-form').onsubmit = function(e) {
+        e.preventDefault();
+        const month = document.getElementById('report-month').value;
+        const content = document.getElementById('report-content').value.trim();
+        const msg = document.getElementById('report-submit-msg');
+        const wc = content.split(/\s+/).filter(Boolean).length;
+        if (!month || !content) { msg.textContent = 'Please fill out both fields.'; return; }
+        if (wc < 150) { msg.textContent = 'Report must be at least 150 words.'; return; }
+        let reports = getMonthlyReports();
+        if (reports.some(r => r.month === month)) { msg.textContent = 'A report for this month already exists.'; return; }
+        reports.push({month, content});
+        saveMonthlyReports(reports);
+        msg.textContent = 'Report submitted!';
+        this.reset();
+        document.getElementById('word-count').textContent = '';
+        updateAssignedAdminInfo();
+    showReportStatusThisMonth();
+    };
+    // Gather analytics data from localStorage
+    const visits = {
+        Home: parseInt(localStorage.getItem('analytics_home')||'0',10),
+        Programs: parseInt(localStorage.getItem('analytics_programs')||'0',10),
+        About: parseInt(localStorage.getItem('analytics_about')||'0',10),
+        Contact: parseInt(localStorage.getItem('analytics_contact')||'0',10)
+    };
+    // Bar chart for page visits
+    new Chart(document.getElementById('visitsChart').getContext('2d'), {
+        type: 'bar',
+        data: {
+            labels: Object.keys(visits),
+            datasets: [{
+                label: 'Visits',
+                data: Object.values(visits),
+                backgroundColor: ['#43cea2','#185a9d','#e3ecff','#ffd700'],
+                borderRadius: 8
+            }]
+        },
+        options: {
+            plugins: { legend: { display: false } },
+            scales: { y: { beginAtZero: true, ticks: { stepSize: 1 } } }
+        }
+    });
+    // Pie chart for usage breakdown
+    new Chart(document.getElementById('usagePie').getContext('2d'), {
+        type: 'pie',
+        data: {
+            labels: Object.keys(visits),
+            datasets: [{
+                data: Object.values(visits),
+                backgroundColor: ['#43cea2','#185a9d','#e3ecff','#ffd700']
+            }]
+        },
+        options: {
+            plugins: { legend: { position: 'bottom' } }
+        }
+    });
+
+    // Real: Monthly percentage change for all main pages
+    function getLast12Months() {
+        const arr = [];
+        const now = new Date();
+        for(let i=11;i>=0;i--) {
+            const d = new Date(now.getFullYear(), now.getMonth()-i, 1);
+            arr.push({
+                label: d.toLocaleString('default', {month:'short', year:'2-digit'}),
+                suffix: '_' + d.getFullYear() + '_' + (d.getMonth()+1)
+            });
+        }
+        return arr;
+    }
+    const pageKeys = [
+        {name:'Home', key:'analytics_home_month_'},
+        {name:'Programs', key:'analytics_programs_month_'},
+        {name:'About', key:'analytics_about_month_'},
+        {name:'Contact', key:'analytics_contact_month_'},
+        {name:'District', key:'analytics_district_month_'}
+    ];
+    const monthsData = getLast12Months();
+    // For each page, get monthly totals and percent change
+    const datasets = pageKeys.map((page,idx) => {
+        const monthlyTotals = monthsData.map(m => parseInt(localStorage.getItem(page.key + m.suffix)||'0',10));
+        const percentChange = monthlyTotals.map((val,i,arr) => i===0 ? 0 : arr[i-1]===0 ? 0 : Math.round(((val-arr[i-1])/arr[i-1])*100));
+        return {
+            label: page.name,
+            data: percentChange,
+            borderColor: ['#185a9d','#43cea2','#ffd700','#e3ecff','#ff6f61'][idx],
+            backgroundColor: 'rgba(67,206,162,0.08)',
+            tension: 0.3,
+            pointBackgroundColor: ['#185a9d','#43cea2','#ffd700','#e3ecff','#ff6f61'][idx],
+            pointRadius: 4,
+            fill: false
+        };
+    });
+    new Chart(document.getElementById('monthlyPercentChart').getContext('2d'), {
+        type: 'line',
+        data: {
+            labels: monthsData.map(m=>m.label),
+            datasets: datasets
+        },
+        options: {
+            plugins: { legend: { display: true } },
+            scales: {
+                y: { beginAtZero: false, ticks: { callback: v => v+"%" } },
+                x: { }
+            },
+            interaction: { mode: 'index', intersect: false }
+        }
+    });
+    </script>
+</body>
+</html>

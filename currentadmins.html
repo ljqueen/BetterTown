@@ -14,18 +14,22 @@
     </style>
 </head>
 <body>
-    <nav class="navbar">
-        <div class="navbar-logo">BetterTown</div>
-        <ul class="navbar-links">
-            <li><a href="index.html">Home</a></li>
-            <li><a href="district.html">District</a></li>
-        </ul>
+    <nav class="navbar" style="background:linear-gradient(90deg,#222 0%,#185a9d 100%);">
+        <div class="navbar-logo" style="margin-right:auto;color:#fff;">BetterTown</div>
+        <div style="display:flex;align-items:center;gap:1.5rem;margin-left:auto;">
+            <ul class="navbar-links" style="margin:0;">
+                <li><a href="index.html">Home</a></li>
+                <li><a href="district.html">District</a></li>
+            </ul>
+        </div>
     </nav>
     <header>
         <h1>All Admins</h1>
     </header>
     <main>
         <section class="admin-list-section">
+            <h2>District Workers</h2>
+            <ul class="admin-list" id="district-workers-list" style="margin-bottom:2rem;"></ul>
             <h2>Current Admins</h2>
             <ul class="admin-list" id="all-admins-list"></ul>
         </section>
@@ -37,46 +41,94 @@
     function loadAllAdmins() {
         const admins = JSON.parse(localStorage.getItem('btown_admin_accounts') || '[]');
         const list = document.getElementById('all-admins-list');
+        const workersList = document.getElementById('district-workers-list');
         if (!admins.length) {
             list.innerHTML = '<li class="no-admins">No admins found.</li>';
+            if (workersList) workersList.innerHTML = '<li class="no-admins">No district workers found.</li>';
             return;
         }
-        list.innerHTML = admins.map((a, i) =>
-            `<li id='admin-li-${i}' style="margin-bottom:1.2rem;">
-                <div><b>Username:</b> <span style="color:#185a9d;">${a.username}</span></div>
-                <div><b>Password:</b> <span style="color:#43cea2;">${a.password || '(none)'}</span></div>
-                <div><b>Email:</b> <span id='admin-email-${i}' style='color:#185a9d;'>${a.email||'no email'}</span>
-                <button onclick='editEmail(${i})' style='margin-left:1rem;'>Edit Email</button></div>
-            </li>`
-        ).join('');
+        // District Workers summary
+        if (workersList) {
+            const workers = admins.filter(a => a.isDistrictWorker === true);
+            workersList.innerHTML = workers.length ? workers.map(a => `<li style='color:#185a9d;font-weight:bold;'>${a.username} <span style='color:#43cea2;'>(District Worker)</span></li>`).join('') : '<li class="no-admins">No district workers found.</li>';
+        }
+        // All admins list
+        list.innerHTML = admins.map((a, i) => {
+            const isWorker = (a.isDistrictWorker === true);
+            return `<li id='admin-li-${i}' style="margin-bottom:1.2rem;${isWorker ? 'background:#e6ffe6;border:2px solid #43cea2;border-radius:8px;' : ''}">
+                <div><b>Username:</b> <span id='admin-username-${i}' style="color:#185a9d;">${a.username}</span> <button onclick='editAdmin(${i})' style='margin-left:1rem;'>Edit</button> <button onclick='deleteAdmin(${i})' style='margin-left:0.7rem;background:#e74c3c;color:#fff;padding:0.2rem 0.7rem;font-size:0.95rem;border:none;border-radius:5px;cursor:pointer;'>Delete</button></div>
+                <div><b>Password:</b> <span id='admin-password-${i}' style="color:#43cea2;">${a.password || '(none)'}</span></div>
+                <div><b>Email:</b> <span id='admin-email-${i}' style='color:#185a9d;'>${a.email||'no email'}</span></div>
+                <div style='margin-top:0.5rem;'>
+                    ${isWorker 
+                        ? `<span style='color:#43cea2;font-weight:bold;'>✔ District Worker</span> <button onclick='removeDistrictWorker(${i})' style='background:#e74c3c;color:#fff;padding:0.2rem 0.7rem;font-size:0.95rem;margin-left:0.7rem;'>Remove</button>`
+                        : `<button onclick='makeDistrictWorker(${i})' style='background:#ffd700;color:#185a9d;padding:0.2rem 0.7rem;font-size:0.95rem;'>Make District Worker</button>`}
+                </div>
+            </li>`;
+        }).join('');
     }
 
-    function editEmail(idx) {
+    function editAdmin(idx) {
         const admins = JSON.parse(localStorage.getItem('btown_admin_accounts') || '[]');
-        const emailSpan = document.getElementById('admin-email-' + idx);
         const li = document.getElementById('admin-li-' + idx);
-        li.innerHTML = `<b>${admins[idx].username}</b> 
-            <input type='email' id='edit-email-input-${idx}' value='${admins[idx].email||''}' style='width:200px;'>
-            <button onclick='saveEmail(${idx})'>Save</button>
-            <button onclick='cancelEditEmail(${idx})'>Cancel</button>`;
+        li.innerHTML = `
+            <div><b>Username:</b> <input type='text' id='edit-username-${idx}' value='${admins[idx].username}' style='width:120px;'></div>
+            <div><b>Password:</b> <input type='text' id='edit-password-${idx}' value='${admins[idx].password||''}' style='width:120px;'></div>
+            <div><b>Email:</b> <input type='email' id='edit-email-${idx}' value='${admins[idx].email||''}' style='width:180px;'></div>
+            <button onclick='saveAdmin(${idx})' style='margin-right:0.7rem;'>Save</button>
+            <button onclick='cancelEditAdmin(${idx})'>Cancel</button>`;
     }
 
-    function saveEmail(idx) {
+    function saveAdmin(idx) {
         const admins = JSON.parse(localStorage.getItem('btown_admin_accounts') || '[]');
-        const newEmail = document.getElementById('edit-email-input-' + idx).value.trim();
-        if (!newEmail) { alert('Email required.'); return; }
-        // Check for unique email
+        const newUsername = document.getElementById('edit-username-' + idx).value.trim();
+        const newPassword = document.getElementById('edit-password-' + idx).value.trim();
+        const newEmail = document.getElementById('edit-email-' + idx).value.trim();
+        if (!newUsername || !newPassword || !newEmail) { alert('All fields required.'); return; }
+        // Check for unique username/email
+        if (admins.some((a, i2) => i2 !== idx && a.username && a.username.toLowerCase() === newUsername.toLowerCase())) {
+            alert('That username is already used by another admin.');
+            return;
+        }
         if (admins.some((a, i2) => i2 !== idx && a.email && a.email.toLowerCase() === newEmail.toLowerCase())) {
             alert('That email is already used by another admin.');
             return;
         }
+        admins[idx].username = newUsername;
+        admins[idx].password = newPassword;
         admins[idx].email = newEmail;
         localStorage.setItem('btown_admin_accounts', JSON.stringify(admins));
         loadAllAdmins();
     }
 
-    function cancelEditEmail(idx) {
+    function cancelEditAdmin(idx) {
         loadAllAdmins();
+    }
+    function deleteAdmin(idx) {
+        let admins = JSON.parse(localStorage.getItem('btown_admin_accounts') || '[]');
+        if (admins.length <= 1) {
+            alert('At least one admin must remain.');
+            return;
+        }
+        if (!confirm('Are you sure you want to delete this admin?')) return;
+        admins.splice(idx, 1);
+        localStorage.setItem('btown_admin_accounts', JSON.stringify(admins));
+        loadAllAdmins();
+    }
+
+    function makeDistrictWorker(idx) {
+        const admins = JSON.parse(localStorage.getItem('btown_admin_accounts') || '[]');
+        admins[idx].isDistrictWorker = true;
+        localStorage.setItem('btown_admin_accounts', JSON.stringify(admins));
+        loadAllAdmins();
+        alert('Admin is now a District Worker and can log in as a district worker.');
+    }
+    function removeDistrictWorker(idx) {
+        const admins = JSON.parse(localStorage.getItem('btown_admin_accounts') || '[]');
+        admins[idx].isDistrictWorker = false;
+        localStorage.setItem('btown_admin_accounts', JSON.stringify(admins));
+        loadAllAdmins();
+        alert('District Worker status removed.');
     }
     window.onload = loadAllAdmins;
     </script>

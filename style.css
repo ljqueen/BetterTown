@@ -42,6 +42,11 @@ body {
     padding: 0;
 }
 
+.navbar-links li {
+    margin-left: 0.7rem;
+    margin-right: 0.7rem;
+}
+
 .navbar-links li a {
     color: #fff;
     text-decoration: none;

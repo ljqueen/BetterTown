@@ -39,7 +39,6 @@
             </div>
             <h2>Admin Tools</h2>
             <div class="admin-section">
-                <button class="admin-btn" onclick="window.open('sign-ups.html','_self')">Manage Sign-Ups</button>
                 <button class="admin-btn" onclick="window.print()">Print This Page</button>
             </div>
             <div class="admin-section">
@@ -52,8 +51,7 @@
             </div>
             <div class="admin-section">
                 <h3>Other Tools</h3>
-                <button class="admin-btn" onclick="clearSignups()">Clear All Sign-Ups</button>
-                <button class="admin-btn" onclick="restoreDeleted()">Restore Deleted Sign-Ups</button>
+                <button class="admin-btn" onclick="window.open('siteA.html','_blank')" style="margin-top:1.2rem;font-size:1.08rem;font-weight:700;">Site Analytics</button>
             </div>
             <div class="admin-section">
                 <!-- Admin management moved to district page -->
@@ -162,9 +160,10 @@
         }
     }
     window.onload = function() {
-        renderAdminLog();
-        renderAdminAccounts();
-        showAdminAccountSection();
+    renderAdminLog();
+    renderAdminAccounts && renderAdminAccounts();
+    showAdminAccountSection && showAdminAccountSection();
+    if (typeof loadSiteAnalytics === 'function') loadSiteAnalytics();
     }
     // Show logged-in admin username in footer
     (function() {
@@ -192,7 +191,9 @@
         e.preventDefault();
         var user = document.getElementById('district-username').value.trim();
         var pass = document.getElementById('district-password').value;
-        if (user === 'ljqueen' && pass === '9311') {
+        let admins = JSON.parse(localStorage.getItem('btown_admin_accounts') || '[]');
+        const found = admins.find(a => a.username === user && a.password === pass && a.isDistrictWorker === true);
+        if (found) {
             window.location.href = 'district.html';
         } else {
             alert('District login failed.');

@@ -7,15 +7,17 @@
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <nav class="navbar">
-        <div class="navbar-logo">BetterTown</div>
-        <ul class="navbar-links">
-            <li><a href="index.html">Home</a></li>
-            <li><a href="about.html">About</a></li>
-            <li><a href="services.html">Programs</a></li>
-            <li><a href="location.html">Our Location</a></li>
-            <li><a href="contact.html">Contact</a></li>
-        </ul>
+    <nav class="navbar" style="background:linear-gradient(90deg,#222 0%,#185a9d 100%);">
+        <div class="navbar-logo" style="margin-right:auto;color:#fff;">BetterTown</div>
+        <div style="display:flex;align-items:center;gap:1.5rem;margin-left:auto;">
+            <ul class="navbar-links" style="margin:0;">
+                <li><a href="index.html">Home</a></li>
+                <li><a href="about.html">About</a></li>
+                <li><a href="services.html">Programs</a></li>
+                <li><a href="location.html">Our Location</a></li>
+                <li><a href="contact.html">Contact</a></li>
+            </ul>
+        </div>
     </nav>
     <header>
     <h1>Welcome to BetterTown</h1>
@@ -24,6 +26,14 @@
         <section>
             <h2>Home</h2>
             <p>BetterTown is a non-profit organization dedicated to building a brighter, more connected community. Join us in making a difference!</p>
+            <div style="background:#fffbe7;border:2px solid #ffd700;padding:1.1rem 1rem 1.1rem 1rem;border-radius:10px;margin:1.2rem 0 0.7rem 0;color:#b8860b;font-weight:600;font-size:1.08rem;">
+                <span>Note: As we get started, some programs and events may take time to launch. Thank you for your patience and support!</span>
+            </div>
+        </section>
+        <section style="background:#e3ecff;border-radius:12px;box-shadow:0 2px 8px #185a9d22;padding:1.5rem 2rem 1.2rem 2rem;margin-bottom:2rem;">
+            <h2 style="color:#185a9d;">🤝 Collaboration with Oceana, WV</h2>
+            <p>We are proud to collaborate with the <b>Town of Oceana, West Virginia</b> to make Wyoming County a better place for everyone. By working together on community projects, events, and outreach, we aim to create lasting positive change for all residents.</p>
+            <p>Follow <a href="https://www.facebook.com/profile.php?id=61580353499669" target="_blank" style="color:#185a9d;font-weight:bold;text-decoration:underline;">BetterTown on Facebook</a> for updates, news, and ways to get involved!</p>
         </section>
         <section style="background:#f6f8fa;border-radius:12px;box-shadow:0 2px 8px #185a9d22;padding:2rem 2rem 1.5rem 2rem;margin-bottom:2rem;">
             <h2 style="color:#185a9d;font-size:1.7rem;letter-spacing:0.5px;font-weight:900;margin-bottom:1.2rem;text-align:center;text-shadow:0 4px 16px #43cea255, 0 1px 2px #185a9d44;">🚀 Our Goals: 2025–2035 Timeline</h2>
@@ -132,6 +142,15 @@
     }
     </style>
     <script>
+    // Increment Home Page Analytics (total and monthly)
+    (function(){
+        let n = parseInt(localStorage.getItem('analytics_home')||'0',10);
+        localStorage.setItem('analytics_home', n+1);
+        const now = new Date();
+        const key = 'analytics_home_month_' + now.getFullYear() + '_' + (now.getMonth()+1);
+        let m = parseInt(localStorage.getItem(key)||'0',10);
+        localStorage.setItem(key, m+1);
+    })();
     // Community Calendar (shared with district page)
     function getEvents() {
         return JSON.parse(localStorage.getItem('district_events') || '[]');

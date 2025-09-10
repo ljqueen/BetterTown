@@ -15,11 +15,13 @@
     </style>
 </head>
 <body>
-    <nav class="navbar">
-        <div class="navbar-logo">BetterTown</div>
-        <ul class="navbar-links">
-            <li><a href="index.html">Home</a></li>
-        </ul>
+    <nav class="navbar" style="background:linear-gradient(90deg,#222 0%,#185a9d 100%);">
+        <div class="navbar-logo" style="margin-right:auto;color:#fff;">BetterTown</div>
+        <div style="display:flex;align-items:center;gap:1.5rem;margin-left:auto;">
+            <ul class="navbar-links" style="margin:0;">
+                <li><a href="index.html">Home</a></li>
+            </ul>
+        </div>
     </nav>
     <main>
         <div class="login-container">
@@ -44,7 +46,9 @@
         var error = document.getElementById('login-error');
         let admins = JSON.parse(localStorage.getItem('btown_admin_accounts') || '[]');
         if (!admins.length) admins = [{username: 'ljqueen', password: '9311'}];
-        if (admins.some(a => a.username === user && a.password === pass)) {
+        // District workers can log in everywhere
+        const found = admins.find(a => a.username === user && a.password === pass);
+        if (found) {
             sessionStorage.setItem('btown_admin', 'yes');
             sessionStorage.setItem('btown_admin_user', user);
             window.location.href = 'admin.html';

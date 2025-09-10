@@ -7,15 +7,17 @@
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <nav class="navbar">
-        <div class="navbar-logo">BetterTown</div>
-        <ul class="navbar-links">
-            <li><a href="index.html">Home</a></li>
-            <li><a href="about.html">About</a></li>
-            <li><a href="services.html">Programs</a></li>
-            <li><a href="location.html">Our Location</a></li>
-            <li><a href="contact.html">Contact</a></li>
-        </ul>
+    <nav class="navbar" style="background:linear-gradient(90deg,#222 0%,#185a9d 100%);">
+        <div class="navbar-logo" style="margin-right:auto;color:#fff;">BetterTown</div>
+        <div style="display:flex;align-items:center;gap:1.5rem;margin-left:auto;">
+            <ul class="navbar-links" style="margin:0;">
+                <li><a href="index.html">Home</a></li>
+                <li><a href="about.html">About</a></li>
+                <li><a href="services.html">Programs</a></li>
+                <li><a href="location.html">Our Location</a></li>
+                <li><a href="contact.html">Contact</a></li>
+            </ul>
+        </div>
     </nav>
     <header>
         <h1>Our Programs</h1>
@@ -106,5 +108,16 @@
     <footer>
         <p>&copy; 2025 BetterTown. All rights reserved.</p>
     </footer>
+    <script>
+    // Increment Programs Page Analytics (total and monthly)
+    (function(){
+        let n = parseInt(localStorage.getItem('analytics_programs')||'0',10);
+        localStorage.setItem('analytics_programs', n+1);
+        const now = new Date();
+        const key = 'analytics_programs_month_' + now.getFullYear() + '_' + (now.getMonth()+1);
+        let m = parseInt(localStorage.getItem(key)||'0',10);
+        localStorage.setItem(key, m+1);
+    })();
+    </script>
 </body>
 </html>
