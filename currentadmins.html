@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>All Admins - BetterTown</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        .admin-list-section { max-width: 600px; margin: 2rem auto; background: #fff; border-radius: 12px; box-shadow: 0 2px 8px #185a9d22; padding: 2rem; }
+        .admin-list-section h2 { color: #185a9d; margin-top: 2rem; }
+        .admin-list { margin-bottom: 2rem; }
+        .admin-list li { margin-bottom: 0.7rem; font-size: 1.1rem; }
+        .no-admins { color: #888; font-style: italic; }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="navbar-logo">BetterTown</div>
+        <ul class="navbar-links">
+            <li><a href="index.html">Home</a></li>
+            <li><a href="district.html">District</a></li>
+        </ul>
+    </nav>
+    <header>
+        <h1>All Admins</h1>
+    </header>
+    <main>
+        <section class="admin-list-section">
+            <h2>Current Admins</h2>
+            <ul class="admin-list" id="all-admins-list"></ul>
+        </section>
+    </main>
+    <footer>
+        <p>&copy; 2025 BetterTown. All rights reserved.</p>
+    </footer>
+    <script>
+    function loadAllAdmins() {
+        const admins = JSON.parse(localStorage.getItem('btown_admin_accounts') || '[]');
+        const list = document.getElementById('all-admins-list');
+        if (!admins.length) {
+            list.innerHTML = '<li class="no-admins">No admins found.</li>';
+            return;
+        }
+        list.innerHTML = admins.map((a, i) =>
+            `<li id='admin-li-${i}' style="margin-bottom:1.2rem;">
+                <div><b>Username:</b> <span style="color:#185a9d;">${a.username}</span></div>
+                <div><b>Password:</b> <span style="color:#43cea2;">${a.password || '(none)'}</span></div>
+                <div><b>Email:</b> <span id='admin-email-${i}' style='color:#185a9d;'>${a.email||'no email'}</span>
+                <button onclick='editEmail(${i})' style='margin-left:1rem;'>Edit Email</button></div>
+            </li>`
+        ).join('');
+    }
+
+    function editEmail(idx) {
+        const admins = JSON.parse(localStorage.getItem('btown_admin_accounts') || '[]');
+        const emailSpan = document.getElementById('admin-email-' + idx);
+        const li = document.getElementById('admin-li-' + idx);
+        li.innerHTML = `<b>${admins[idx].username}</b> 
+            <input type='email' id='edit-email-input-${idx}' value='${admins[idx].email||''}' style='width:200px;'>
+            <button onclick='saveEmail(${idx})'>Save</button>
+            <button onclick='cancelEditEmail(${idx})'>Cancel</button>`;
+    }
+
+    function saveEmail(idx) {
+        const admins = JSON.parse(localStorage.getItem('btown_admin_accounts') || '[]');
+        const newEmail = document.getElementById('edit-email-input-' + idx).value.trim();
+        if (!newEmail) { alert('Email required.'); return; }
+        // Check for unique email
+        if (admins.some((a, i2) => i2 !== idx && a.email && a.email.toLowerCase() === newEmail.toLowerCase())) {
+            alert('That email is already used by another admin.');
+            return;
+        }
+        admins[idx].email = newEmail;
+        localStorage.setItem('btown_admin_accounts', JSON.stringify(admins));
+        loadAllAdmins();
+    }
+
+    function cancelEditEmail(idx) {
+        loadAllAdmins();
+    }
+    window.onload = loadAllAdmins;
+    </script>
+</body>
+</html>

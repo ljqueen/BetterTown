@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sign-Ups - BetterTown</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        .signup-list-section { max-width: 600px; margin: 2rem auto; background: #fff; border-radius: 12px; box-shadow: 0 2px 8px #185a9d22; padding: 2rem; }
+        .signup-list-section h2 { color: #185a9d; margin-top: 2rem; }
+        .signup-list { margin-bottom: 2rem; }
+        .signup-list li { margin-bottom: 0.5rem; font-size: 1.1rem; }
+        .no-signups { color: #888; font-style: italic; }
+        .signup-edit-btn, .signup-delete-btn { margin-left: 0.7rem; font-size: 0.95rem; border: none; border-radius: 6px; padding: 0.2rem 0.7rem; cursor: pointer; }
+        .signup-edit-btn { background: #43cea2; color: #fff; }
+        .signup-edit-btn:hover { background: #185a9d; }
+        .signup-delete-btn { background: #e74c3c; color: #fff; }
+        .signup-delete-btn:hover { background: #c0392b; }
+        .signup-edit-fields { display: inline-block; margin-left: 0.5rem; }
+        .signup-edit-fields input { width: 120px; margin-right: 0.3rem; }
+    </style>
+</head>
+<body onload="adminAuth()">
+    <nav class="navbar">
+        <div class="navbar-logo">BetterTown</div>
+        <ul class="navbar-links">
+            <li><a href="index.html">Home</a></li>
+            <li><a href="about.html">About</a></li>
+            <li><a href="services.html">Programs</a></li>
+            <li><a href="location.html">Our Location</a></li>
+            <li><a href="contact.html">Contact</a></li>
+        </ul>
+    </nav>
+    <header>
+        <h1>Sign-Ups</h1>
+    </header>
+    <main>
+        <section class="signup-list-section">
+            <h2>Oceana, WV</h2>
+            <ul class="signup-list" id="oceana-list"></ul>
+            <h2>Other Locations</h2>
+            <ul class="signup-list" id="other-list"></ul>
+        </section>
+    </main>
+    <footer>
+        <p>&copy; 2025 BetterTown. All rights reserved.</p>
+    </footer>
+    <script>
+    function adminAuth() {
+        var allowed = sessionStorage.getItem('btown_admin');
+        if (allowed === 'yes') return;
+        alert('Admin access only. Please log in.');
+        window.location.href = 'login.html';
+    }
+
+    // Load sign-ups from localStorage and organize by location
+    function loadSignups() {
+        const signups = JSON.parse(localStorage.getItem('bettertow_signup_list') || '[]');
+        renderSignups(signups);
+    }
+    function renderSignups(signups) {
+        const oceana = signups.filter(s => (s.location || '').toLowerCase().includes('oceana'));
+        const other = signups.filter(s => !(s.location || '').toLowerCase().includes('oceana'));
+        const oceanaList = document.getElementById('oceana-list');
+        const otherList = document.getElementById('other-list');
+        oceanaList.innerHTML = oceana.length ? oceana.map((s, i) => signupListItem(s, i, 'oceana')).join('') : '<li class="no-signups">No sign-ups yet.</li>';
+        otherList.innerHTML = other.length ? other.map((s, i) => signupListItem(s, i, 'other')).join('') : '<li class="no-signups">No sign-ups yet.</li>';
+    }
+    function signupListItem(s, idx, group) {
+        const id = group + '-' + idx;
+        return `<li id="li-${id}">
+            <span class="signup-info" id="info-${id}"><b>${s.program}</b> (${s.location || 'N/A'}): <span id="email-${id}">${s.email}</span> (Age: <span id="age-${id}">${s.age}</span>)</span>
+            <button class="signup-edit-btn" onclick="editSignup('${id}')">Edit</button>
+            <button class="signup-delete-btn" onclick="deleteSignup('${id}')">Delete</button>
+        </li>`;
+    }
+    function getAllSignups() {
+        return JSON.parse(localStorage.getItem('bettertow_signup_list') || '[]');
+    }
+    function saveAllSignups(signups) {
+        localStorage.setItem('bettertow_signup_list', JSON.stringify(signups));
+        loadSignups();
+    }
+    function deleteSignup(id) {
+        if (!confirm('Delete this sign-up?')) return;
+        let signups = getAllSignups();
+        let idx = getSignupIndexById(id, signups);
+        if (idx !== -1) {
+            signups.splice(idx, 1);
+            saveAllSignups(signups);
+        }
+    }
+    function editSignup(id) {
+        const info = document.getElementById('info-' + id);
+        const signups = getAllSignups();
+        let idx = getSignupIndexById(id, signups);
+        if (idx === -1) return;
+        const s = signups[idx];
+        info.innerHTML = `<b>${s.program}</b> (${s.location || 'N/A'}):
+            <span class='signup-edit-fields'>
+                <input type='email' id='edit-email-${id}' value='${s.email}' required>
+                <input type='number' id='edit-age-${id}' value='${s.age}' min='14' required style='width:60px;'>
+                <button class='signup-edit-btn' onclick="saveEditSignup('${id}')">Save</button>
+                <button class='signup-delete-btn' onclick="cancelEditSignup('${id}')">Cancel</button>
+            </span>`;
+    }
+    function saveEditSignup(id) {
+        let signups = getAllSignups();
+        let idx = getSignupIndexById(id, signups);
+        if (idx === -1) return;
+        const email = document.getElementById('edit-email-' + id).value;
+        const age = parseInt(document.getElementById('edit-age-' + id).value, 10);
+        if (!email || isNaN(age) || age < 14) {
+            alert('Please enter a valid email and age (14 or older).');
+            return;
+        }
+        signups[idx].email = email;
+        signups[idx].age = age;
+        saveAllSignups(signups);
+    }
+    function cancelEditSignup(id) {
+        loadSignups();
+    }
+    function getSignupIndexById(id, signups) {
+        // id is group-idx, so find the idx-th item in the group
+        const [group, idx] = id.split('-');
+        const oceana = signups.filter(s => (s.location || '').toLowerCase().includes('oceana'));
+        const other = signups.filter(s => !(s.location || '').toLowerCase().includes('oceana'));
+        if (group === 'oceana') {
+            return signups.findIndex(s => oceana[idx] && s.email === oceana[idx].email && s.program === oceana[idx].program && s.location === oceana[idx].location);
+        } else {
+            return signups.findIndex(s => other[idx] && s.email === other[idx].email && s.program === other[idx].program && s.location === other[idx].location);
+        }
+    }
+    window.onload = loadSignups;
+    </script>
+</body>
+</html>

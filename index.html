@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Home - BetterTown</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="navbar-logo">BetterTown</div>
+        <ul class="navbar-links">
+            <li><a href="index.html">Home</a></li>
+            <li><a href="about.html">About</a></li>
+            <li><a href="services.html">Programs</a></li>
+            <li><a href="location.html">Our Location</a></li>
+            <li><a href="contact.html">Contact</a></li>
+        </ul>
+    </nav>
+    <header>
+    <h1>Welcome to BetterTown</h1>
+    </header>
+    <main>
+        <section>
+            <h2>Home</h2>
+            <p>BetterTown is a non-profit organization dedicated to building a brighter, more connected community. Join us in making a difference!</p>
+        </section>
+        <section style="background:#f6f8fa;border-radius:12px;box-shadow:0 2px 8px #185a9d22;padding:2rem 2rem 1.5rem 2rem;margin-bottom:2rem;">
+            <h2 style="color:#185a9d;font-size:1.7rem;letter-spacing:0.5px;font-weight:900;margin-bottom:1.2rem;text-align:center;text-shadow:0 4px 16px #43cea255, 0 1px 2px #185a9d44;">🚀 Our Goals: 2025–2035 Timeline</h2>
+            <div class="timeline">
+                <div class="timeline-item">
+                    <div class="timeline-dot" style="background:#43cea2;"></div>
+                    <div class="timeline-content"><span class="timeline-year">2025</span> <span class="timeline-icon">🤝</span> <b>Expand community outreach</b> and increase volunteer participation.</div>
+                </div>
+                <div class="timeline-item">
+                    <div class="timeline-dot" style="background:#43cea2;"></div>
+                    <div class="timeline-content"><span class="timeline-year">2027</span> <span class="timeline-icon">🎓</span> <b>Launch new youth and education programs</b> in partnership with local schools.</div>
+                </div>
+                <div class="timeline-item">
+                    <div class="timeline-dot" style="background:#43cea2;"></div>
+                    <div class="timeline-content"><span class="timeline-year">2029</span> <span class="timeline-icon">🏛️</span> <b>Complete the BetterTown Community Center</b> and host annual events.</div>
+                </div>
+                <div class="timeline-item">
+                    <div class="timeline-dot" style="background:#43cea2;"></div>
+                    <div class="timeline-content"><span class="timeline-year">2031</span> <span class="timeline-icon">💼</span> <b>Achieve 50% increase in local employment</b> through job training initiatives.</div>
+                </div>
+                <div class="timeline-item">
+                    <div class="timeline-dot" style="background:#43cea2;"></div>
+                    <div class="timeline-content"><span class="timeline-year">2033</span> <span class="timeline-icon">🌱</span> <b>Lead a county-wide sustainability</b> and beautification project.</div>
+                </div>
+                <div class="timeline-item">
+                    <div class="timeline-dot" style="background:#185a9d;"></div>
+                    <div class="timeline-content"><span class="timeline-year">2035</span> <span class="timeline-icon">🏆</span> <b>Become a model for rural community development</b> in West Virginia.</div>
+                </div>
+            </div>
+            <style>
+            .timeline {
+                position: relative;
+                margin: 2rem auto 1rem auto;
+                max-width: 600px;
+                padding-left: 30px;
+                border-left: 4px solid #43cea2;
+            }
+            .timeline-item {
+                display: flex;
+                align-items: flex-start;
+                margin-bottom: 2.2rem;
+                position: relative;
+            }
+            .timeline-dot {
+                width: 22px;
+                height: 22px;
+                border-radius: 50%;
+                margin-left: -41px;
+                margin-right: 18px;
+                border: 3px solid #fff;
+                box-shadow: 0 2px 8px #185a9d33;
+            }
+            .timeline-content {
+                background: #fff;
+                border-radius: 10px;
+                box-shadow: 0 2px 8px #185a9d22;
+                padding: 1.1rem 1.3rem;
+                font-size: 1.13rem;
+                font-weight: 500;
+                color: #222;
+                min-width: 220px;
+                max-width: 420px;
+                position: relative;
+            }
+            .timeline-year {
+                color: #185a9d;
+                font-weight: 900;
+                font-size: 1.1rem;
+                margin-right: 0.7rem;
+            }
+            .timeline-icon {
+                font-size: 1.2rem;
+                margin-right: 0.5rem;
+            }
+            @media (max-width: 700px) {
+                .timeline { max-width: 98vw; padding-left: 18px; }
+                .timeline-content { max-width: 98vw; }
+            }
+            </style>
+        </section>
+        <section class="calendar-section">
+            <h2 style="color:#185a9d;font-size:1.7rem;font-weight:900;letter-spacing:0.5px;margin-top:2.2rem;">Community Calendar</h2>
+            <div id="calendar" style="max-width:900px;margin:0 auto 2rem auto;font-size:1.18rem;"></div>
+        </section>
+    </main>
+    <footer>
+        <p>&copy; 2025 BetterTown. All rights reserved.</p>
+        <p style="margin-top:1rem;"><a href="login.html" style="color:#fff;font-weight:bold;text-decoration:underline;">Admin</a></p>
+    <style>
+    /* Make calendar table bigger and bold like district */
+    .calendar-table th, .calendar-table td {
+        font-size: 1.18rem !important;
+        font-weight: 700 !important;
+        padding: 1.1rem !important;
+    }
+    .calendar-table th {
+        background: #185a9d;
+        color: #fff;
+        font-weight: 900 !important;
+    }
+    .calendar-table td.event-day {
+        background: linear-gradient(90deg, #43cea2 0%, #185a9d 100%);
+        color: #fff;
+        font-weight: bold;
+        border-radius: 6px;
+    }
+    </style>
+    <script>
+    // Community Calendar (shared with district page)
+    function getEvents() {
+        return JSON.parse(localStorage.getItem('district_events') || '[]');
+    }
+    function renderCalendar() {
+        const events = getEvents();
+        const calendar = document.getElementById('calendar');
+        const today = new Date();
+        const year = today.getFullYear();
+        const month = today.getMonth();
+        const firstDay = new Date(year, month, 1);
+        const lastDay = new Date(year, month + 1, 0);
+        let html = `<div style='text-align:center;font-weight:bold;font-size:1.2rem;margin-bottom:0.7rem;'>${today.toLocaleString('default', { month: 'long' })} ${year}</div>`;
+        html += '<table class="calendar-table"><tr>';
+        const days = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+        for (let d of days) html += `<th>${d}</th>`;
+        html += '</tr><tr>';
+        for (let i = 0; i < firstDay.getDay(); i++) html += '<td></td>';
+        for (let d = 1; d <= lastDay.getDate(); d++) {
+            const dateStr = `${year}-${String(month+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+            const dayEvents = events.filter(ev => ev.date === dateStr);
+            if ((firstDay.getDay() + d - 1) % 7 === 0 && d !== 1) html += '</tr><tr>';
+            if (dayEvents.length) {
+                html += `<td class='event-day' title='${dayEvents.map(ev => ev.title + ' at ' + ev.time).join('\n')}'>${d}<div style='font-size:0.8rem;margin-top:0.2rem;'>${dayEvents.map(ev => `<div>${ev.title} <span style='color:#185a9d;'>${ev.time}</span></div>`).join('')}</div></td>`;
+            } else {
+                html += `<td>${d}</td>`;
+            }
+        }
+        html += '</tr></table>';
+        calendar.innerHTML = html;
+    }
+    renderCalendar();
+    </script>
+    </footer>
+</body>
+</html>

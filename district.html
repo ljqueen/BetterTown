@@ -1,0 +1,477 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>District Management - BetterTown</title>
+        <link rel="stylesheet" href="style.css">
+        <!-- EmailJS integration -->
+            <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
+            <script>
+    // Add a new admin account from the form
+    function districtAddAdminAccount(e) {
+        e.preventDefault();
+        const username = document.getElementById('district-new-admin-username').value.trim();
+        const password = document.getElementById('district-new-admin-password').value;
+        const email = document.getElementById('district-new-admin-email').value.trim();
+        if (!username || !password || !email) {
+            alert('Please fill in all fields.');
+            return;
+        }
+        let admins = JSON.parse(localStorage.getItem('btown_admin_accounts') || '[]');
+        if (admins.some(a => a.username.toLowerCase() === username.toLowerCase())) {
+            alert('That username is already an admin.');
+            return;
+        }
+        if (admins.some(a => a.email.toLowerCase() === email.toLowerCase())) {
+            alert('That email is already used by an admin.');
+            return;
+        }
+        admins.push({ username, password, email });
+        localStorage.setItem('btown_admin_accounts', JSON.stringify(admins));
+        document.getElementById('district-add-admin-form').reset();
+        renderDistrictAdminAccounts();
+        alert('Admin added!');
+    }
+    // Sync admin accounts from admin.html logic if missing
+    (function syncAdminAccountsFromAdminPage() {
+        let admins = JSON.parse(localStorage.getItem('btown_admin_accounts') || '[]');
+        if (!admins.length) {
+            admins = [{username: 'ljqueen', password: '9311', email: 'ceo@bettertowndemo.org'}];
+            localStorage.setItem('btown_admin_accounts', JSON.stringify(admins));
+        } else {
+            let changed = false;
+            admins.forEach(a => {
+                if (!a.email) {
+                    a.email = a.username + '@bettertowndemo.org';
+                    changed = true;
+                }
+            });
+            if (changed) {
+                localStorage.setItem('btown_admin_accounts', JSON.stringify(admins));
+            }
+        }
+    })();
+    // Ensure all admin accounts have an email field (sync from admin.html logic)
+    (function ensureAdminEmails() {
+        let admins = JSON.parse(localStorage.getItem('btown_admin_accounts') || '[]');
+        let changed = false;
+        admins.forEach(a => {
+            if (!a.email) {
+                a.email = a.username + '@bettertowndemo.org';
+                changed = true;
+            }
+        });
+        if (changed) {
+            localStorage.setItem('btown_admin_accounts', JSON.stringify(admins));
+        }
+    })();
+                (function(){
+                emailjs.init("tqZmiqOcUs7kXnmi6"); // Set to your EmailJS public key
+                })();
+            </script>
+        <style>
+        body {
+            background: #f6f8fa;
+            font-family: 'Segoe UI', Arial, sans-serif;
+        }
+        .district-panel {
+            max-width: 700px;
+            margin: 2.5rem auto;
+            background: #fff;
+            border-radius: 18px;
+            box-shadow: 0 4px 24px #185a9d18;
+            padding: 2.5rem 2rem 2rem 2rem;
+        }
+        .district-panel h2 {
+            color: #185a9d;
+            margin-top: 2.2rem;
+            font-size: 1.4rem;
+            letter-spacing: 0.5px;
+        }
+        .district-panel h1 {
+            font-size: 2.1rem;
+            color: #222;
+            margin-bottom: 1.2rem;
+        }
+        .admin-btn, .signup-edit-btn, .signup-delete-btn {
+            background: linear-gradient(90deg, #43cea2 0%, #185a9d 100%);
+            color: #fff;
+            border: none;
+            border-radius: 8px;
+            padding: 0.5rem 1.2rem;
+            font-size: 1rem;
+            margin: 0.2rem 0.2rem 0.2rem 0;
+            cursor: pointer;
+            transition: background 0.2s, box-shadow 0.2s;
+            box-shadow: 0 2px 8px #185a9d22;
+        }
+        .admin-btn:hover, .signup-edit-btn:hover, .signup-delete-btn:hover {
+            background: linear-gradient(90deg, #185a9d 0%, #43cea2 100%);
+        }
+        input, select {
+            border: 1px solid #d1d5db;
+            border-radius: 7px;
+            padding: 0.45rem 0.9rem;
+            font-size: 1rem;
+            margin-bottom: 0.5rem;
+            margin-right: 0.5rem;
+            background: #f9fafb;
+            transition: border 0.2s;
+        }
+        input:focus, select:focus {
+            border: 1.5px solid #43cea2;
+            outline: none;
+        }
+        .event-list, #signup-email-list {
+            margin-bottom: 2rem;
+            padding-left: 0;
+        }
+        .event-list li, #signup-email-list li {
+            margin-bottom: 0.7rem;
+            font-size: 1.08rem;
+            background: #f6f8fa;
+            border-radius: 7px;
+            padding: 0.7rem 1rem;
+            box-shadow: 0 1px 4px #185a9d11;
+            list-style: none;
+        }
+        .calendar-section {
+            margin-top: 2.5rem;
+        }
+        .calendar-table {
+            border-collapse: separate;
+            border-spacing: 0.2rem;
+            width: 100%;
+            background: #f9fafb;
+            border-radius: 10px;
+            overflow: hidden;
+        }
+        .calendar-table th, .calendar-table td {
+            border: none;
+            padding: 0.7rem;
+            text-align: center;
+        }
+        .calendar-table th {
+            background: #185a9d;
+            color: #fff;
+            font-weight: 500;
+        }
+        .calendar-table td.event-day {
+            background: linear-gradient(90deg, #43cea2 0%, #185a9d 100%);
+            color: #fff;
+            font-weight: bold;
+            cursor: pointer;
+            border-radius: 6px;
+        }
+        .calendar-table td {
+            cursor: pointer;
+            border-radius: 6px;
+        }
+        #signup-email-controls, #signup-email-form {
+            background: #f6f8fa;
+            border-radius: 8px;
+            padding: 1rem 1.2rem;
+            margin-bottom: 1.2rem;
+            box-shadow: 0 1px 4px #185a9d11;
+        }
+        #open-signup-menu-btn {
+            margin-bottom: 1.2rem;
+        }
+        @media (max-width: 600px) {
+            .district-panel { padding: 1rem 0.5rem; }
+            .calendar-table th, .calendar-table td { padding: 0.3rem; font-size: 0.95rem; }
+            input, select { font-size: 0.95rem; padding: 0.3rem 0.5rem; }
+        }
+        </style>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="navbar-logo">BetterTown</div>
+        <ul class="navbar-links">
+            <li><a href="index.html">Home</a></li>
+        </ul>
+    </nav>
+    <header>
+        <h1>District Management</h1>
+    </header>
+    <main>
+        <section class="district-panel">
+            <h2>Manage Events</h2>
+            <form id="add-event-form" onsubmit="addEvent(event)" style="margin-bottom:1.5rem;">
+                <input type="text" id="event-title" placeholder="Event Title" required style="width:200px;">
+                <input type="date" id="event-date" required>
+                <input type="time" id="event-time" required style="width:120px;">
+                <input type="text" id="event-location" placeholder="Location (e.g. Oceana, WV)" required style="width:180px;">
+                <select id="event-program" required style="width:160px;">
+                    <option value="">Select Program</option>
+                    <option value="Student Program">Student Program</option>
+                    <option value="Rebuilding Program">Rebuilding Program</option>
+                    <option value="Community Program">Community Program</option>
+                </select>
+                <button class="admin-btn" type="submit">Add Event</button>
+            </form>
+            <ul class="event-list" id="event-list"></ul>
+            <div class="calendar-section">
+                <h2>Community Calendar</h2>
+                <div id="calendar"></div>
+            </div>
+            <div class="district-section" style="margin-top:2.5rem;">
+                <div class="admin-section" style="margin-bottom:2.5rem;">
+                    <h2>Manage Admins</h2>
+                    <div style="margin-bottom:0.7rem;"><a href="currentadmins.html" style="color:#185a9d;text-decoration:underline;font-weight:bold;">View All Admins (Full List)</a></div>
+                    <div id="district-admin-list" style="margin-bottom:1.2rem;"></div>
+                    <div id="district-admin-accounts-section"></div>
+                    <form id="district-add-admin-form" onsubmit="districtAddAdminAccount(event)" style="margin-top:1.2rem;">
+                        <input type="text" id="district-new-admin-username" placeholder="New Username" required style="width:120px;">
+                        <input type="password" id="district-new-admin-password" placeholder="New Password" required style="width:120px;">
+                        <input type="email" id="district-new-admin-email" placeholder="Email" required style="width:180px;">
+                        <button class="admin-btn" type="submit">Add Admin</button>
+                    </form>
+                </div>
+                <h2>Meetings</h2>
+                <div id="signup-email-controls" style="margin-bottom:1.2rem; display:none;">
+                    <button class="admin-btn" onclick="selectAllSignupEmails(true)">Select All</button>
+                    <button class="admin-btn" onclick="selectAllSignupEmails(false)">Deselect All</button>
+                    <button class="admin-btn" onclick="closeSignupMenu()">Close</button>
+                </div>
+                <div id="signup-email-form" style="margin-bottom:1.2rem; display:none;">
+                    <input type="text" id="mass-meeting-title" placeholder="Email Subject" style="width:220px; margin-right:0.7rem;">
+                    <input type="text" id="mass-meeting-message" placeholder="Message/Details" style="width:320px; margin-right:0.7rem;">
+                    <input type="text" id="mass-meeting-sender" placeholder="Your Name (Sender)" style="width:180px; margin-right:0.7rem;">
+                    <button class="admin-btn" onclick="massSendMeetingEmails()">Send Email to Selected</button>
+                </div>
+                <button class="admin-btn" id="open-signup-menu-btn" onclick="openSignupMenu()" style="margin-bottom:1.2rem;">Show Sign-Up Email Menu</button>
+                <ul id="signup-email-list" style="margin-bottom:2rem; display:none;"></ul>
+                <ul class="meeting-list" id="meeting-list"></ul>
+            </div>
+        </section>
+    </main>
+    <footer>
+        <p>&copy; 2025 BetterTown. All rights reserved.</p>
+    </footer>
+    <script>
+    // Event management
+    function getEvents() {
+        return JSON.parse(localStorage.getItem('district_events') || '[]');
+    }
+    function saveEvents(events) {
+        localStorage.setItem('district_events', JSON.stringify(events));
+        renderEvents();
+        renderCalendar();
+    }
+    function addEvent(e) {
+        e.preventDefault();
+        const title = document.getElementById('event-title').value.trim();
+        const date = document.getElementById('event-date').value;
+        const time = document.getElementById('event-time').value;
+        const location = document.getElementById('event-location').value.trim();
+        const program = document.getElementById('event-program').value;
+        if (!title || !date || !time || !location || !program) return;
+        let events = getEvents();
+        events.push({ title, date, time, location, program });
+        saveEvents(events);
+        document.getElementById('add-event-form').reset();
+    }
+    function renderEvents() {
+        const events = getEvents();
+        const list = document.getElementById('event-list');
+        if (!events.length) {
+            list.innerHTML = '<li>No events yet.</li>';
+            return;
+        }
+        // Group by location and program
+        let grouped = {};
+        events.forEach(function(ev, idx) {
+            if (!grouped[ev.location]) grouped[ev.location] = {};
+            if (!grouped[ev.location][ev.program]) grouped[ev.location][ev.program] = [];
+            grouped[ev.location][ev.program].push({ ...ev, _idx: idx });
+        });
+        let html = '';
+        for (let loc in grouped) {
+            html += `<li style='margin-top:1.2rem;'><b style='color:#185a9d;'>Location: ${loc}</b><ul>`;
+            for (let prog in grouped[loc]) {
+                html += `<li style='margin-top:0.7rem;'><b style='color:#43cea2;'>Program: ${prog}</b><ul>`;
+                html += grouped[loc][prog].map(function(e) {
+                    return `<li><b>${e.title}</b> (${e.date} at ${e.time}) <button class='admin-btn' onclick='deleteEventByIdx(${e._idx})'>Delete</button></li>`;
+                }).join('');
+                html += '</ul></li>';
+            }
+            html += '</ul></li>';
+        }
+        list.innerHTML = html;
+    }
+    function deleteEventByIdx(idx) {
+        let events = getEvents();
+        events.splice(idx, 1);
+        saveEvents(events);
+    }
+    // Simple calendar
+    function renderCalendar() {
+        const events = getEvents();
+        const calendar = document.getElementById('calendar');
+        const today = new Date();
+        const year = today.getFullYear();
+        const month = today.getMonth();
+        const firstDay = new Date(year, month, 1);
+        const lastDay = new Date(year, month + 1, 0);
+        let html = `<div style='text-align:center;font-weight:bold;font-size:1.2rem;margin-bottom:0.7rem;'>${today.toLocaleString('default', { month: 'long' })} ${year}</div>`;
+        html += '<table class="calendar-table"><tr>';
+        const days = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+        for (let d of days) html += `<th>${d}</th>`;
+        html += '</tr><tr>';
+        for (let i = 0; i < firstDay.getDay(); i++) html += '<td></td>';
+        for (let d = 1; d <= lastDay.getDate(); d++) {
+            const dateStr = `${year}-${String(month+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+            const dayEvents = events.filter(ev => ev.date === dateStr);
+            if ((firstDay.getDay() + d - 1) % 7 === 0 && d !== 1) html += '</tr><tr>';
+            if (dayEvents.length) {
+                html += `<td class='event-day' title='${dayEvents.map(ev => ev.title + ' at ' + ev.time).join('\n')}'>${d}<div style='font-size:0.8rem;margin-top:0.2rem;'>${dayEvents.map(ev => `<div>${ev.title} <span style='color:#185a9d;'>${ev.time}</span></div>`).join('')}</div></td>`;
+            } else {
+                html += `<td>${d}</td>`;
+            }
+        }
+        html += '</tr></table>';
+        calendar.innerHTML = html;
+    }
+    // Meeting management (simplified, no email sending in this demo)
+    // --- Mass meeting email to sign-ups ---
+    function openSignupMenu() {
+        document.getElementById('signup-email-controls').style.display = '';
+        document.getElementById('signup-email-form').style.display = '';
+        document.getElementById('signup-email-list').style.display = '';
+        document.getElementById('open-signup-menu-btn').style.display = 'none';
+        loadSignupEmails();
+    }
+    function closeSignupMenu() {
+        document.getElementById('signup-email-controls').style.display = 'none';
+        document.getElementById('signup-email-form').style.display = 'none';
+        document.getElementById('signup-email-list').style.display = 'none';
+        document.getElementById('open-signup-menu-btn').style.display = '';
+    }
+    function loadSignupEmails() {
+        const signups = JSON.parse(localStorage.getItem('bettertow_signup_list') || '[]');
+        const admins = JSON.parse(localStorage.getItem('btown_admin_accounts') || '[]');
+        const list = document.getElementById('signup-email-list');
+        // Collect all emails (sign-ups and admin emails)
+        let allEmails = [];
+        signups.forEach(s => {
+            if (s.email) allEmails.push({ email: s.email, label: `${s.email} (${s.program}, ${s.location || 'N/A'})` });
+        });
+        admins.forEach(a => {
+            if (a.email && !allEmails.some(e => e.email.toLowerCase() === a.email.toLowerCase())) {
+                allEmails.push({ email: a.email, label: `${a.email} (admin)` });
+            }
+        });
+        if (!allEmails.length) {
+            list.innerHTML = '<li style="color:#888;">No sign-ups or admin emails found.</li>';
+            return;
+        }
+        list.innerHTML = allEmails.map((e, i) =>
+            `<li><input type='checkbox' class='signup-email-cb' data-email='${e.email}' id='signup-email-cb-${i}' style='margin-right:0.7rem;'>${e.label}</li>`
+        ).join('');
+    }
+
+    function selectAllSignupEmails(val) {
+        document.querySelectorAll('.signup-email-cb').forEach(cb => { cb.checked = val; });
+    }
+
+    function massSendMeetingEmails() {
+        const selected = Array.from(document.querySelectorAll('.signup-email-cb:checked'));
+        if (!selected.length) { alert('No emails selected.'); return; }
+        const emails = selected.map(cb => cb.getAttribute('data-email'));
+        const title = document.getElementById('mass-meeting-title').value.trim();
+        const message = document.getElementById('mass-meeting-message').value.trim();
+        const sender = document.getElementById('mass-meeting-sender').value.trim();
+        if (!title || !message || !sender) {
+            alert('Please fill in the subject, message, and your name.');
+            return;
+        }
+        let sentCount = 0, failedCount = 0;
+        emails.forEach(function(email) {
+            emailjs.send("joshua", "template_aw7b0xf", {
+                to_email: email,
+                meeting_title: title,
+                message: message + "\n\nSent by: " + sender
+            })
+            .then(function() { sentCount++; checkDone(); }, function() { failedCount++; checkDone(); });
+        });
+        function checkDone() {
+            if (sentCount + failedCount === emails.length) {
+                alert(`Meeting emails sent: ${sentCount}, failed: ${failedCount}`);
+            }
+        }
+    }
+    renderCalendar();
+    renderMeetings();
+
+    // --- Admin Edit/Delete UI ---
+    function renderDistrictAdminList() {
+        const admins = getDistrictAdminAccounts();
+        const listDiv = document.getElementById('district-admin-list');
+        if (!admins.length) {
+            listDiv.innerHTML = '<div style="color:#888;">No admins found.</div>';
+            return;
+        }
+        listDiv.innerHTML = '<b>Current Admins:</b><ul style="margin:0.5rem 0 0 1.2rem;">' +
+            admins.map((a, i) =>
+                `<li id='admin-li-${i}'>
+                    <span id='admin-info-${i}'>
+                        <b>${a.username}</b> <span style='color:#185a9d;'>${a.email||'no email'}</span>
+                    </span>
+                    <button class='admin-btn' style='padding:0.2rem 0.7rem;font-size:0.95rem;' onclick='editDistrictAdmin(${i})'>Edit</button>
+                    <button class='admin-btn' style='background:#e74c3c;padding:0.2rem 0.7rem;font-size:0.95rem;' onclick='deleteDistrictAdmin(${i})'>Delete</button>
+                </li>`
+            ).join('') + '</ul>';
+    }
+
+    function editDistrictAdmin(idx) {
+        const admins = getDistrictAdminAccounts();
+        const a = admins[idx];
+        const info = document.getElementById('admin-info-' + idx);
+        info.innerHTML = `
+            <input type='text' id='edit-admin-username-${idx}' value='${a.username}' style='width:100px;margin-right:0.5rem;'>
+            <input type='email' id='edit-admin-email-${idx}' value='${a.email}' style='width:160px;margin-right:0.5rem;'>
+            <input type='password' id='edit-admin-password-${idx}' value='${a.password}' style='width:100px;margin-right:0.5rem;'>
+            <button class='admin-btn' style='padding:0.2rem 0.7rem;font-size:0.95rem;' onclick='saveDistrictAdmin(${idx})'>Save</button>
+            <button class='admin-btn' style='background:#888;padding:0.2rem 0.7rem;font-size:0.95rem;' onclick='cancelEditDistrictAdmin(${idx})'>Cancel</button>
+        `;
+    }
+
+    function saveDistrictAdmin(idx) {
+        let admins = getDistrictAdminAccounts();
+        const username = document.getElementById('edit-admin-username-' + idx).value.trim();
+        const email = document.getElementById('edit-admin-email-' + idx).value.trim();
+        const password = document.getElementById('edit-admin-password-' + idx).value;
+        if (!username || !email || !password) {
+            alert('All fields required.');
+            return;
+        }
+        // Check for unique username/email (except for this admin)
+        if (admins.some((a, i2) => i2 !== idx && a.username.toLowerCase() === username.toLowerCase())) {
+            alert('That username is already used by another admin.');
+            return;
+        }
+        if (admins.some((a, i2) => i2 !== idx && a.email.toLowerCase() === email.toLowerCase())) {
+            alert('That email is already used by another admin.');
+            return;
+        }
+        admins[idx] = { username, email, password };
+        localStorage.setItem('btown_admin_accounts', JSON.stringify(admins));
+        renderDistrictAdminAccounts();
+    }
+
+    function cancelEditDistrictAdmin(idx) {
+        renderDistrictAdminAccounts();
+    }
+
+    function deleteDistrictAdmin(idx) {
+        if (!confirm('Delete this admin?')) return;
+        let admins = getDistrictAdminAccounts();
+        admins.splice(idx, 1);
+        localStorage.setItem('btown_admin_accounts', JSON.stringify(admins));
+        renderDistrictAdminAccounts();
+    }
+    </script>
+</body>
+</html>

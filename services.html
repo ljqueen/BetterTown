@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Programs - BetterTown</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="navbar-logo">BetterTown</div>
+        <ul class="navbar-links">
+            <li><a href="index.html">Home</a></li>
+            <li><a href="about.html">About</a></li>
+            <li><a href="services.html">Programs</a></li>
+            <li><a href="location.html">Our Location</a></li>
+            <li><a href="contact.html">Contact</a></li>
+        </ul>
+    </nav>
+    <header>
+        <h1>Our Programs</h1>
+    </header>
+    <main>
+        <section>
+            <h2>Programs</h2>
+            <p>We offer a variety of programs to support our community, including food drives, educational workshops, and neighborhood improvement projects.</p>
+        </section>
+        <section>
+            <h2>Our Programs</h2>
+            <div style="margin-bottom:2.5rem;">
+                <h3>Student Program</h3>
+                <p>We help students get recognized by colleges and provide opportunities for academic growth and achievement. Our program connects students with scholarships, awards, and recognition events.</p>
+                <button class="signup-btn" onclick="openSignup('Student Program')">Sign Up</button>
+            </div>
+            <div style="margin-bottom:2.5rem;">
+                <h3>Rebuilding Program</h3>
+                <p>We work to improve and update the look of our town through community-driven projects, including fixing public spaces and organizing trash cleanups. Join us in making our town a better place to live!</p>
+                <button class="signup-btn" onclick="openSignup('Rebuilding Program')">Sign Up</button>
+            </div>
+            <div>
+                <h3>Community Program</h3>
+                <p>We host and plan community events in partnership with the government of Oceana, WV. Our goal is to bring people together, foster connections, and create lasting positive change through local events and initiatives.</p>
+                <button class="signup-btn" onclick="openSignup('Community Program')">Sign Up</button>
+            </div>
+            <div id="signup-modal" class="signup-modal" style="display:none;">
+                <div class="signup-modal-content">
+                    <span class="signup-close" onclick="closeSignup()">&times;</span>
+                    <h2 id="signup-title">Sign Up</h2>
+                    <form onsubmit="submitSignup(event)">
+                        <label for="signup-email">Email:</label>
+                        <input type="email" id="signup-email" name="signup-email" required style="width:100%;padding:0.5rem;margin:0.7rem 0 1.2rem 0;">
+                        <label for="signup-location">Location (City, State):</label>
+                        <input type="text" id="signup-location" name="signup-location" placeholder="e.g. Oceana, WV" required style="width:100%;padding:0.5rem;margin:0.7rem 0 1.2rem 0;">
+                        <label for="signup-age">Age:</label>
+                        <input type="number" id="signup-age" name="signup-age" min="14" required style="width:100%;padding:0.5rem;margin:0.7rem 0 1.2rem 0;">
+                        <div style="margin:0.7rem 0 1.2rem 0;text-align:left;">
+                            <input type="checkbox" id="age-verify" name="age-verify" required>
+                            <label for="age-verify" style="display:inline;">I confirm that my age is correct and I understand providing false information may result in removal from the program.</label>
+                        </div>
+                        <input type="hidden" id="signup-program" name="signup-program">
+                        <button type="submit" class="signup-btn">Submit</button>
+                    </form>
+                    <div id="signup-success" style="display:none;color:#185a9d;font-weight:bold;margin-top:1rem;">Thank you for signing up!</div>
+                </div>
+            </div>
+            <script>
+            function openSignup(program) {
+                document.getElementById('signup-modal').style.display = 'block';
+                document.getElementById('signup-title').textContent = 'Sign Up for ' + program;
+                document.getElementById('signup-program').value = program;
+                document.getElementById('signup-success').style.display = 'none';
+                document.getElementById('signup-email').value = '';
+            }
+            function closeSignup() {
+                document.getElementById('signup-modal').style.display = 'none';
+            }
+            function submitSignup(e) {
+                e.preventDefault();
+                var email = document.getElementById('signup-email').value;
+                var location = document.getElementById('signup-location').value;
+                var age = parseInt(document.getElementById('signup-age').value, 10);
+                var program = document.getElementById('signup-program').value;
+                if (isNaN(age) || age < 14) {
+                    alert('You must be at least 14 years old to join.');
+                    return;
+                }
+                    let signups = JSON.parse(localStorage.getItem('bettertow_signup_list') || '[]');
+                    if (signups.some(s => s.email.toLowerCase() === email.toLowerCase())) {
+                        alert('This email has already been used to sign up. Please use a different email.');
+                        return;
+                    }
+                    signups.push({ email, location, age, program });
+                    localStorage.setItem('bettertow_signup_list', JSON.stringify(signups));
+                document.getElementById('signup-success').style.display = 'block';
+                setTimeout(closeSignup, 1800);
+            }
+            window.onclick = function(event) {
+                var modal = document.getElementById('signup-modal');
+                if (event.target == modal) {
+                    closeSignup();
+                }
+            }
+            </script>
+        </section>
+    </main>
+    <footer>
+        <p>&copy; 2025 BetterTown. All rights reserved.</p>
+    </footer>
+</body>
+</html>
