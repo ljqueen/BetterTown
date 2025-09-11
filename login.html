@@ -38,6 +38,17 @@
         <p>&copy; 2025 BetterTown. All rights reserved.</p>
     </footer>
     <script>
+    // Always ensure default admins exist for login
+    (function ensureDefaultAdmins() {
+        let admins = JSON.parse(localStorage.getItem('btown_admin_accounts') || '[]');
+        if (!admins.length) {
+            admins = [
+                {username: 'ljqueen', password: '9311', email: 'ceo@bettertowndemo.org', isDistrictWorker: true},
+                {username: 'willowspence', password: 'willow2025', email: 'willow.spence@bettertowndemo.org'}
+            ];
+            localStorage.setItem('btown_admin_accounts', JSON.stringify(admins));
+        }
+    })();
     // Patch login to support multiple admins
     window.loginAdmin = function(e) {
         e.preventDefault();
