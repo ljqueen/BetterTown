@@ -1,3 +1,54 @@
+/* Mobile-friendly responsive styles */
+@media (max-width: 800px) {
+    .navbar {
+        flex-direction: column;
+        align-items: flex-start;
+        padding: 1rem 1rem;
+    }
+    .navbar-logo {
+        font-size: 1.7rem;
+        margin-bottom: 0.7rem;
+    }
+    .navbar-links {
+        flex-direction: column;
+        gap: 0.7rem;
+        width: 100%;
+        align-items: flex-start;
+    }
+    .navbar-links li {
+        margin: 0.3rem 0;
+    }
+    main {
+        max-width: 100vw;
+        padding: 0 0.5rem;
+    }
+    section {
+        padding: 1.2rem 0.7rem 1.2rem 0.7rem;
+        font-size: 1.05rem;
+    }
+    header h1 {
+        font-size: 1.5rem;
+        padding: 1.2rem 0 0.7rem 0;
+    }
+    .district-panel, .admin-panel, .analytics-panel, .signup-list-section, .admin-list-section {
+        padding: 1.2rem 0.7rem 1.2rem 0.7rem !important;
+        max-width: 99vw !important;
+    }
+    .calendar-table th, .calendar-table td {
+        padding: 0.3rem !important;
+        font-size: 0.95rem !important;
+    }
+    input, select, textarea, button {
+        font-size: 1rem !important;
+        width: 100% !important;
+        box-sizing: border-box;
+        margin-bottom: 0.7rem;
+    }
+    .signup-modal-content {
+        padding: 1.2rem 0.7rem 1.2rem 0.7rem;
+        max-width: 99vw;
+    }
+}
 body {
     font-family: 'Segoe UI', Arial, sans-serif;
     margin: 0;
